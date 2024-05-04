@@ -23,7 +23,7 @@ a:hover {
 }
 #header {
   width: 100%;
-  height: max-content;
+  height: 64px;
   padding: .5rem 1rem;
   background: var(--red);
   display: flex;
