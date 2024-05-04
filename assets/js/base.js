@@ -1,0 +1,101 @@
+function customScrollbar() {
+  let {
+      OverlayScrollbars,
+      ScrollbarsHidingPlugin,
+      SizeObserverPlugin,
+      ClickScrollPlugin
+  } = OverlayScrollbarsGlobal;
+  OverlayScrollbars(document.querySelector('#content'), {
+      overflow: {
+          x: 'hidden',
+      },
+  });
+}
+
+function colorBook() {
+  let eleBookcontainer = document.querySelector(".book-container");
+  let rows = window.getComputedStyle(eleBookcontainer).getPropertyValue('grid-template-rows').split(" ").length;
+  let columns = window.getComputedStyle(eleBookcontainer).getPropertyValue('grid-template-columns').split(" ").length;
+  let colorArray = [];
+  for (let i=0; i<rows; i++) {
+    colorArray.push(chroma.random().brighten(2));
+  }
+  let eleBooks = document.querySelectorAll(".show");
+  [...eleBooks].forEach((ele, index) => {
+    ele.style.background = colorArray[Math.floor(index / columns)];
+  })
+}
+
+function searchBook() {
+  let eleBookContainer = document.querySelector(".book-container");
+  let eleBooks = document.querySelectorAll(".book");
+  let eleSearchButton = document.querySelector(".search-button");
+  let elelSearchTerm = document.querySelector(".search-term");
+  let eleLoader = document.querySelector("#loader");
+  let eleNoResult = document.querySelector("#no-result");
+
+  function initSearch() {
+    [...eleBooks].forEach((ele) => {
+      ele.style.display = "flex";
+    })
+  }
+
+  function startSearch() {
+    initSearch();
+    hideNoResult();
+    displayLoader();
+    let keywords = elelSearchTerm.value;
+    setTimeout(() => displayBook(keywords), 100);
+    setTimeout(hideLoader, 100);
+  }
+
+  eleSearchButton.addEventListener('pointerdown', () => {
+    startSearch();
+  })
+
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+      startSearch();
+    }
+  })
+
+  function displayLoader() {
+    eleLoader.style.display = 'block';
+    eleBookContainer.style.filter = 'brightness(0.2)';
+  }
+
+  function hideLoader() {
+    eleLoader.style.display = 'none';
+    eleBookContainer.style.filter = 'brightness(1)';
+  }
+
+
+  function displayNoResult() {
+    eleNoResult.style.display = 'block';
+  }
+
+  function hideNoResult() {
+    eleNoResult.style.display = 'none';
+  }
+
+  function displayBook(keywords='') {
+    let count = 0;
+    Array.from(eleBooks).forEach((ele) => {
+      let text = ele.querySelector(".book-name > a").innerText;
+      if (text.includes(keywords)) {
+        count ++;
+      } else {
+        ele.style.display = "none";
+      }
+    })
+    if (count === 0) {
+      displayNoResult();
+    }
+    eleBookContainer.scrollIntoView();
+  }
+}
+
+
+customScrollbar();
+// colorBook();
+searchBook();

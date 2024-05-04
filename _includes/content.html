@@ -1,0 +1,17 @@
+<div id="content">
+  {% assign url_prefix = site.data.metadata.url_prefix %}
+  {% assign url_suffix = site.data.metadata.url_suffix %}
+  <div class="book-container">
+    {% for item in site.data.textbook %}
+      <div class="book show">
+        <div class="book-cover">
+          <!-- <img src="https://picsum.photos/200/300" loading="lazy" /> -->
+          <img src="{{ item.file_cover_url }}" loading="lazy" />
+        </div>
+        <div class="book-name">
+          <a href="{{ url_prefix }}{{ item.file_id }}{{ url_suffix }}">{{ item.file_name }}-{{ item.file_tag }}</a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
