@@ -167,4 +167,10 @@ a:hover {
     overflow: auto;
     font-size: 1rem;
   }
+  #header {
+    padding: 0;
+  }
+  #logo {
+    font-size: 1.2rem;
+  }
 }
