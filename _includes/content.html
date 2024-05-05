@@ -6,7 +6,7 @@
       <div class="book show">
         <div class="book-cover">
           <!-- <img src="https://picsum.photos/200/300" loading="lazy" /> -->
-          <img src="{{ item.file_cover_url }}" rel="noopener noreferrer" loading="lazy" />
+          <img src="{{ item.file_cover_url }}" referrerpolicy="no-referrer" loading="lazy" />
         </div>
         <div class="book-name">
           <a href="{{ url_prefix }}{{ item.file_id }}{{ url_suffix }}" target="_blank" rel="noopener noreferrer">{{ item.file_name }}-{{ item.file_tag }}</a>

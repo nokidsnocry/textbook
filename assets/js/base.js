@@ -27,7 +27,8 @@ function colorBook() {
 }
 
 function searchBook() {
-  let eleBookContainer = document.querySelector(".book-container");
+  let eleBookContainer = document.querySelector("#content");
+  let eleContainer = document.querySelector(".book-container");
   let eleBooks = document.querySelectorAll(".book");
   let eleSearchButton = document.querySelector(".search-button");
   let elelSearchTerm = document.querySelector(".search-term");
@@ -91,11 +92,34 @@ function searchBook() {
     if (count === 0) {
       displayNoResult();
     }
-    eleBookContainer.scrollIntoView();
+    eleContainer.scrollIntoView();
   }
+}
+
+
+function loadCover() {
+  let eleBooks = document.querySelectorAll(".show");
+  let height = window.innerHeight;
+  [...eleBooks].forEach((ele) => {
+    let top = ele.getBoundingClientRect().top;
+    if (height - top > 100) {
+      console.log(top);
+      let eleImg = ele.querySelector("img");
+      let cover_url = eleImg.getAttribute("data-url");
+      fetch(cover_url, {
+        "referrer": "https://basic.smartedu.cn/"
+      }).then(res => {
+        return res.blob();
+      }).then(blob => {
+        let imgSrc = URL.createObjectURL(blob);
+        eleImg.src = imgSrc;
+      })
+    }
+  })
 }
 
 
 customScrollbar();
 // colorBook();
 searchBook();
+// loadCover();
