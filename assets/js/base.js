@@ -1,3 +1,9 @@
+import { metadata, textdata } from "./data.js";
+
+let bookdata = textdata;
+let bookAmount = bookdata.length;
+let loadAmount = 0;
+
 function customScrollbar() {
   let {
       OverlayScrollbars,
@@ -26,74 +32,41 @@ function colorBook() {
   })
 }
 
-function searchBook() {
-  let eleBookContainer = document.querySelector("#content");
+function initSearch() {
   let eleContainer = document.querySelector(".book-container");
-  let eleBooks = document.querySelectorAll(".book");
-  let eleSearchButton = document.querySelector(".search-button");
+  while (eleContainer.firstChild) {
+    eleContainer.removeChild(eleContainer.firstChild);
+  }
+  eleContainer.scrollIntoView();
+  hideNoResult();
+}
+
+function searchBook() {
   let elelSearchTerm = document.querySelector(".search-term");
-  let eleLoader = document.querySelector("#loader");
+  let searchResult = [];
+  let searchTerm = elelSearchTerm.value;
+  textdata.forEach((data) => {
+    if (data.file_name.includes(searchTerm) || data.file_tag.includes(searchTerm)) {
+      searchResult.push(data);
+    }
+  })
+  if (searchResult.length === 0) {
+    displayNoResult();
+  }
+  bookdata = searchResult;
+  bookAmount = bookdata.length;
+  loadAmount = 0;
+}
+
+
+function displayNoResult() {
   let eleNoResult = document.querySelector("#no-result");
+  eleNoResult.style.display = 'block';
+}
 
-  function initSearch() {
-    [...eleBooks].forEach((ele) => {
-      ele.style.display = "flex";
-    })
-  }
-
-  function startSearch() {
-    initSearch();
-    hideNoResult();
-    displayLoader();
-    let keywords = elelSearchTerm.value;
-    setTimeout(() => displayBook(keywords), 100);
-    setTimeout(hideLoader, 100);
-  }
-
-  eleSearchButton.addEventListener('pointerdown', () => {
-    startSearch();
-  })
-
-  document.addEventListener("keyup", (e) => {
-    if (e.key === "Enter") {
-      startSearch();
-    }
-  })
-
-  function displayLoader() {
-    eleLoader.style.display = 'block';
-    eleBookContainer.style.filter = 'brightness(0.2)';
-  }
-
-  function hideLoader() {
-    eleLoader.style.display = 'none';
-    eleBookContainer.style.filter = 'brightness(1)';
-  }
-
-
-  function displayNoResult() {
-    eleNoResult.style.display = 'block';
-  }
-
-  function hideNoResult() {
-    eleNoResult.style.display = 'none';
-  }
-
-  function displayBook(keywords='') {
-    let count = 0;
-    Array.from(eleBooks).forEach((ele) => {
-      let text = ele.querySelector(".book-name > a").innerText;
-      if (text.includes(keywords)) {
-        count ++;
-      } else {
-        ele.style.display = "none";
-      }
-    })
-    if (count === 0) {
-      displayNoResult();
-    }
-    eleContainer.scrollIntoView();
-  }
+function hideNoResult() {
+  let eleNoResult = document.querySelector("#no-result");
+  eleNoResult.style.display = 'none';
 }
 
 
@@ -103,7 +76,6 @@ function loadCover() {
   [...eleBooks].forEach((ele) => {
     let top = ele.getBoundingClientRect().top;
     if (height - top > 100) {
-      console.log(top);
       let eleImg = ele.querySelector("img");
       let cover_url = eleImg.getAttribute("data-url");
       fetch(cover_url, {
@@ -119,7 +91,72 @@ function loadCover() {
 }
 
 
+function loadBook(n=10) {
+  let eleContainer = document.querySelector(".book-container");
+  function createElement(imgUrl, fileUrl, fileName) {
+    let eleBook = document.createElement("div");
+    eleBook.classList.add("book");
+    eleBook.classList.add("show");
+    let eleBookCover = document.createElement("div");
+    eleBookCover.classList.add("book-cover");
+    let eleImg = document.createElement("img");
+    eleImg.setAttribute("referrerpolicy", "no-referrer");
+    eleImg.setAttribute("loading", "lazy");
+    eleImg.src = imgUrl;
+    eleBookCover.appendChild(eleImg);
+    eleBook.appendChild(eleBookCover);
+    let eleBookName = document.createElement("div");
+    eleBookName.classList.add("book-name");
+    let eleA = document.createElement("a");
+    eleA.href = fileUrl;
+    eleA.setAttribute("target", "_blank");
+    eleA.setAttribute("rel", "noopener noreferrer");
+    eleA.innerText = fileName;
+    eleBookName.appendChild(eleA);
+    eleBook.appendChild(eleBookName);
+    eleContainer.appendChild(eleBook);
+  }
+  if (loadAmount < bookAmount) {
+    for (let i=0; i<n; i++) {
+      let imgUrl = bookdata[loadAmount].file_cover_url;
+      let fileUrl = metadata.prefix + bookdata[loadAmount].file_id + metadata.suffix;
+      let fileName = bookdata[loadAmount].file_name + "-" + bookdata[loadAmount].file_tag;
+      createElement(imgUrl, fileUrl, fileName);
+      loadAmount ++;
+      if (loadAmount === bookAmount) {
+        break;
+      }
+    }
+  }
+}
+
+function listener() {
+  let eleSearchButton = document.querySelector(".search-button");
+  eleSearchButton.addEventListener("pointerdown", () => {
+    initSearch();
+    searchBook();
+    loadBook(30);
+  });
+
+  document.addEventListener("keyup", (e) => {
+    if (e.key === "Enter") {
+      initSearch();
+      searchBook();
+      loadBook(30);
+    }
+  })
+
+  window.addEventListener("wheel", () => {
+    let eleLastBook = document.querySelector(".book:last-child");
+    let eleLastBookTop = eleLastBook.getBoundingClientRect().top;
+    let windowHeight = window.innerHeight;
+    if (eleLastBookTop - windowHeight < 0) {
+      loadBook();
+    }
+  })
+}
+
+
 customScrollbar();
-// colorBook();
-searchBook();
-// loadCover();
+loadBook(30);
+listener();
